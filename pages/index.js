@@ -1,4 +1,3 @@
-
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import Web3Modal from "web3modal";
@@ -52,6 +51,32 @@ export default function Home() {
   };
 
   /**
+   * getNumberOfWhitelisted:  gets the number of whitelisted addresses
+   */
+
+  const getNumberOfWhitelisted = async () => {
+    try {
+      // Get the provider from web3Modal, which in our case is MetaMask
+      // No need for the Signer here, as we are only reading state from the blockchain
+      const provider = await getProviderOrSigner();
+      // We connect to the Contract using a Provider, so we will only
+      // have read-only access to the Contract
+      const whitelistContract = new Contract(
+        WHITELIST_CONTRACT_ADDRESS,
+        abi,
+        provider
+      );
+      // call the numAddressesWhitelisted from the contract
+      const _numberOfWhitelisted =
+        await whitelistContract.numAddressesWhitelisted();
+        
+      setNumberOfWhitelisted(_numberOfWhitelisted);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /**
    * addAddressToWhitelist: Adds the current connected address to the whitelist
    */
   const addAddressToWhitelist = async () => {
@@ -80,29 +105,6 @@ export default function Home() {
   };
 
   /**
-   * getNumberOfWhitelisted:  gets the number of whitelisted addresses
-   */
-  const getNumberOfWhitelisted = async () => {
-    try {
-      // Get the provider from web3Modal, which in our case is MetaMask
-      // No need for the Signer here, as we are only reading state from the blockchain
-      const provider = await getProviderOrSigner();
-      // We connect to the Contract using a Provider, so we will only
-      // have read-only access to the Contract
-      const whitelistContract = new Contract(
-        WHITELIST_CONTRACT_ADDRESS,
-        abi,
-        provider
-      );
-      // call the numAddressesWhitelisted from the contract
-      const _numberOfWhitelisted = await whitelistContract.numAddressesWhitelisted();
-      setNumberOfWhitelisted(_numberOfWhitelisted);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  /**
    * checkIfAddressInWhitelist: Checks if the address is in whitelist
    */
   const checkIfAddressInWhitelist = async () => {
@@ -119,9 +121,10 @@ export default function Home() {
       // Get the address associated to the signer which is connected to  MetaMask
       const address = await signer.getAddress();
       // call the whitelistedAddresses from the contract
-      const _joinedWhitelist = await whitelistContract.whitelistedAddresses(
+      const _joinedWhitelist = await whitelistContract.whitelistedAddress(
         address
       );
+
       setJoinedWhitelist(_joinedWhitelist);
     } catch (err) {
       console.error(err);
